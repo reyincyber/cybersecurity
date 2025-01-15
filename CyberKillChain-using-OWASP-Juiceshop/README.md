@@ -40,72 +40,125 @@ This project used the Cyber Kill Chain to simulate cyberattacks on the **OWASP J
 ---
 
 ## Methodology
-1. **Target**: OWASP Juice Shop, chosen for its representation of real-world web application vulnerabilities.
+
+1. **Teams**: Divided into an attack team and a defense team.
+   - The attack team followed the Cyber Kill Chain stages to simulate an attack.
+   - The defense team implemented and tested defensive strategies.
+2. **Target**: OWASP Juice Shop, chosen for its representation of real-world web application vulnerabilities.
 3. **Tools Used**:
    - **Burp Suite**: For scanning, vulnerability identification, and payload delivery.
-   - **OWASP Zap**: For vulnerability assessment.
    - **Kali Linux**: For attack simulation and OSINT.
+   - **OWASP Zap**: For vulnerability assessment.
 
 ---
 
 ## Simulation Details
 
+### **Prerequisites**
+1. **Set up Virtual Environment**:
+   - Install **VirtualBox** on your host machine.
+   - Download and install **Kali Linux** ISO and configure it in VirtualBox.
+   - Allocate sufficient resources (4GB RAM, 2 CPUs recommended).
+
+2. **Install OWASP Juice Shop**:
+   - Install **Node.js** and **npm** on your host machine or another VM.
+   - Clone the Juice Shop repository:  
+     ```bash
+     git clone https://github.com/juice-shop/juice-shop.git
+     cd juice-shop
+     npm install
+     npm start
+     ```
+   - Access Juice Shop at `http://127.0.0.1:4200` from Kali Linux.
+
+3. **Install Necessary Tools**:
+   - Install **Burp Suite**:  
+     ```bash
+     sudo apt install burpsuite
+     ```
+   - Update **Kali Linux** and install other tools if not pre-installed:  
+     ```bash
+     sudo apt update && sudo apt install nmap nikto gobuster
+     ```
+
+---
+
 ### Reconnaissance
 
 - **Goal**: Gather information about the target system.
-- **Actions**:
-  - Used **OSINT** to collect publicly available data.
-  - Leveraged **Burp Suite** to scan for vulnerabilities on the Juice Shop's URL.
-- **Findings**:
-  - Identified vulnerabilities: **Broken Authentication** and **Broken Access Control**.
-- **Defensive Measures**:
-  - Implemented network segmentation to limit information access.
-  - Monitored external sources for mentions of the Juice Shop.
+- **Steps**:
+  1. Use **OSINT tools** (e.g., theHarvester) to collect publicly available data:  
+     ```bash
+     theHarvester -d example.com -b all
+     ```
+  2. Use **Burp Suite** to scan the Juice Shop URL for vulnerabilities:
+     - Configure Burp Suite as a proxy.
+     - Intercept and analyze traffic while browsing the Juice Shop application.
+     - Perform a scan and identify vulnerabilities like **Broken Authentication** and **Broken Access Control**.
+
+#### **Defensive Measures**:
+- Implement **network segmentation** to limit data exposure.
+- Monitor external sources for mentions of the Juice Shop.
+
+---
 
 ### Weaponization and Delivery
 
 - **Goal**: Prepare and deliver a payload targeting identified vulnerabilities.
-- **Actions**:
-  - Used a brute-force password-cracking script via Burp Suite's Intruder tool.
-  - Exploited weak password policies.
-- **Outcome**:
-  - Successfully matched a valid admin password (**admin123**) from the payload.
-- **Defensive Measures**:
-  - Enforced strong password policies (minimum length, character variety).
-  - Enabled **Multi-Factor Authentication (MFA)** for all user accounts.
-  - Adhered to the **Principle of Least Privilege**.
+- **Steps**:
+  1. Use **Burp Suite's Intruder tool** to execute a brute-force attack:
+     - Intercept login requests and set up payload positions.
+     - Load a password list (e.g., `rockyou.txt`) and initiate the attack.
+  2. Analyze responses for successful login attempts (e.g., HTTP 200 status).
+
+#### **Defensive Measures**:
+- Enforce **strong password policies**.
+- Enable **MFA** for all user accounts.
+- Adhere to the **Principle of Least Privilege**.
+
+---
 
 ### Exploitation
 
 - **Goal**: Exploit vulnerabilities to gain unauthorized access.
-- **Actions**:
-  - Used stolen credentials to access admin privileges.
-  - Downloaded sensitive files from the Juice Shop’s FTP server.
-- **Defensive Recommendations**:
-  - Deploy **Data Loss Prevention (DLP)** solutions to restrict unauthorized data exfiltration.
-  - Implement **User Activity Monitoring (UAM)** systems to detect suspicious behaviors.
+- **Steps**:
+  1. Use stolen credentials to log in to Juice Shop and access restricted areas.
+  2. Use **FTP tools** to download sensitive files:
+     ```bash
+     ftp 127.0.0.1
+     ls
+     get sensitive_file.txt
+     ```
+
+#### **Defensive Recommendations**:
+- Deploy **Data Loss Prevention (DLP)** solutions.
+- Implement **User Activity Monitoring (UAM)** systems.
+
+---
 
 ### Actions on Objectives
 
 - **Goal**: Achieve the final objective (data theft or system disruption).
-- **Actions**:
-  - Deleted critical files using stolen admin credentials.
-- **Impact**:
-  - Potential for severe disruption and compliance issues in real-world scenarios.
-- **Defensive Recommendations**:
-  - Maintain a robust backup and recovery strategy.
-  - Encrypt sensitive files to prevent plaintext access.
-  - Deploy continuous monitoring tools for anomaly detection.
+- **Steps**:
+  1. Use admin credentials to delete critical files:
+     ```bash
+     rm critical_file.txt
+     ```
+
+#### **Defensive Recommendations**:
+- Maintain a robust **backup and recovery strategy**.
+- Encrypt sensitive files to prevent plaintext access.
+- Deploy **continuous monitoring tools** to detect anomalies and flag malicious activity.
 
 ---
 
 ## Findings and Recommendations
 
-1. **Findings**:
+**Findings**:
    - OWASP Juice Shop demonstrated significant vulnerabilities to common attack methods.
    - Defensive measures varied in effectiveness; MFA and network segmentation were particularly impactful.
 
-2. **Recommendations**:
+**Recommendations**:
    - Employ a **layered defense approach**, combining network segmentation, DLP, MFA, and strong password policies.
    - Implement incident response plans to respond swiftly to breaches.
    - Continuously monitor systems for suspicious activities.
@@ -125,11 +178,3 @@ This project highlighted the vulnerabilities within the OWASP Juice Shop and the
 - EC-Council. (2022). [The Cyber Kill Chain: The Seven Steps of a Cyberattack](https://www.eccouncil.org/cybersecurity-exchange/threat-intelligence/cyber-kill-chain-seven-steps-cyberattack/).
 - Martin, L. (2011). [Cyber Kill Chain](https://www.lockheedmartin.com/en-us/capabilities/cyber/cyber-kill-chain.html) - Lockheed Martin.
 - Roy, G. K. (2024). [OWASP Juice Shop](https://www.scaler.com/topics/cyber-security/owasp-juice-shop/) - Scaler Topics.
-
----
-
-## How to Use This Repository
-
-This repository provides documentation, simulation scripts, and configurations for assessing cyber defense strategies. For further assistance or to contribute, please see the [CONTRIBUTING.md](CONTRIBUTING.md) file.
-
----
